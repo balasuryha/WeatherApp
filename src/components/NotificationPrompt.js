@@ -1,9 +1,11 @@
+// src/components/NotificationPrompt.js
+
 import React, { useEffect, useState } from "react";
-import { messaging, getToken, onMessage } from "../firebase-config";
+import messaging from "../firebase-config";
+import { getToken, onMessage } from "firebase/messaging";
 
 const NotificationPrompt = () => {
   const [permission, setPermission] = useState(Notification.permission);
-  const [token, setToken] = useState(null);
 
   const requestPermission = async () => {
     try {
@@ -12,39 +14,32 @@ const NotificationPrompt = () => {
 
       if (result === "granted") {
         const fcmToken = await getToken(messaging, {
-          vapidKey: "YOUR_PUBLIC_VAPID_KEY" // Replace with your Firebase project's Web Push certificate key
+          vapidKey: "YOUR_PUBLIC_VAPID_KEY"
         });
 
         if (fcmToken) {
-          console.log("FCM Token:", fcmToken);
-          setToken(fcmToken);
-          // You can send this token to your backend to schedule push notifications
+          console.log("✅ FCM Token:", fcmToken);
         }
       }
     } catch (err) {
-      console.error("Push notification setup failed:", err);
+      console.error("❌ Error getting push token:", err);
     }
   };
 
   useEffect(() => {
-    onMessage(messaging, (payload) => {
-      console.log("Push message received:", payload);
-      if (payload?.notification?.title) {
-        alert(payload.notification.title);
-      }
+    const unsubscribe = onMessage(messaging, (payload) => {
+      alert(payload?.notification?.title || "Weather Notification!");
     });
+
+    return () => unsubscribe();
   }, []);
 
   return (
-    <div className="notification-prompt">
+    <div>
       {permission !== "granted" ? (
-        <button onClick={requestPermission}>
-          Enable Daily Weather Alerts
-        </button>
+        <button onClick={requestPermission}>Enable Daily Weather Alerts</button>
       ) : (
-        <p style={{ fontSize: "0.9rem", color: "green" }}>
-          ✅ Notifications enabled
-        </p>
+        <p>✅ Notifications enabled</p>
       )}
     </div>
   );
