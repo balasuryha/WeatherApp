@@ -1,0 +1,1 @@
+getToken(messaging, { vapidKey: 'BOn9dHn59RhNmCHPXvnVEE0RHeW3gOo11mRKAlWtCiuSQj3IxWEHDeU-7wt8rID_89vREXrqZjMXKf8JyEzBzu0' })
